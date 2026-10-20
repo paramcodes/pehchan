@@ -1,0 +1,7 @@
+# Functions in src/db that read rows nobody owns, so they take no actor id.
+# Format: <function name> — <reason>
+
+countCatalogue — counts public companions and shared categories
+listCategories — categories are shared catalogue rows with no owner
+listCompanions — reads public companions only
+listFeaturedCompanions — reads public companions only

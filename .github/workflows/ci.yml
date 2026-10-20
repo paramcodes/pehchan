@@ -60,7 +60,7 @@ jobs:
         run: pnpm db:seed
 
       - name: Verify
-        run: pnpm verify
+        run: pnpm verify:full
 
-      - name: Integration tests
-        run: pnpm test:integration
+      - name: Smoke test
+        run: pnpm smoke

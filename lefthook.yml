@@ -1,0 +1,18 @@
+# Local fast gate. Runs on every commit so a broken change is caught before it
+# reaches the branch.
+
+pre-commit:
+  parallel: true
+  commands:
+    branch:
+      run: bash scripts/guard-branch.sh
+    agent-block:
+      run: node scripts/check-agent-block.mjs .
+    format-check:
+      glob: "*.{ts,tsx,js,mjs,cjs,json,md,mdx,css,yml,yaml}"
+      run: pnpm exec prettier --check {staged_files}
+    lint:
+      glob: "*.{ts,tsx}"
+      run: pnpm exec eslint --max-warnings=0 {staged_files}
+    typecheck:
+      run: pnpm typecheck

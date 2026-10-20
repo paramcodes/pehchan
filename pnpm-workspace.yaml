@@ -1,6 +1,7 @@
 allowBuilds:
   esbuild: true
   sharp: true
+  lefthook: true
   playwright: false
   unrs-resolver: false
 minimumReleaseAgeExclude:
