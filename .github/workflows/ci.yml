@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg18
+        env:
+          POSTGRES_USER: pehchan
+          POSTGRES_PASSWORD: pehchan
+          POSTGRES_DB: pehchan
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pehchan -d pehchan"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://pehchan:pehchan@localhost:5432/pehchan
+      BETTER_AUTH_SECRET: ci-only-secret-that-is-long-enough
+      BETTER_AUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      AI_MODE: mock
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.9.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations
+        run: pnpm db:migrate
+
+      - name: Seed catalogue
+        run: pnpm db:seed
+
+      - name: Verify
+        run: pnpm verify
+
+      - name: Integration tests
+        run: pnpm test:integration

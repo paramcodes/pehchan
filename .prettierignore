@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+pnpm-workspace.yaml
+.next
+node_modules
+drizzle
+coverage
+todo.md
+tsconfig.tsbuildinfo
