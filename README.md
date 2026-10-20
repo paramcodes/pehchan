@@ -7,6 +7,31 @@ the public catalogue or stay private.
 The app is a working vertical slice. Auth, catalogue search, streaming chat, persisted history,
 vector memory, and companion CRUD all hit real rows in Postgres.
 
+## Demo
+
+The recording walks through the catalogue, sign-up, a streamed conversation, and companion
+creation. It runs on the production build with `AI_MODE=mock`.
+
+![Pehchan walkthrough](docs/media/pehchan-demo.gif)
+
+[Watch the MP4](docs/media/pehchan-demo.mp4) for a sharper copy.
+
+## Screenshots
+
+![Landing page](docs/screenshots/home.webp)
+
+| Explore                                            | Companion                                         |
+| -------------------------------------------------- | ------------------------------------------------- |
+| ![Catalogue search](docs/screenshots/explore.webp) | ![Companion detail](docs/screenshots/detail.webp) |
+
+| Chat                                          | Studio editor                                     |
+| --------------------------------------------- | ------------------------------------------------- |
+| ![Streaming chat](docs/screenshots/chat.webp) | ![Companion editor](docs/screenshots/editor.webp) |
+
+| Studio                                            | Chat history                                 |
+| ------------------------------------------------- | -------------------------------------------- |
+| ![Companion studio](docs/screenshots/studio.webp) | ![Chat history](docs/screenshots/chats.webp) |
+
 ## Stack
 
 | Layer     | Choice                                                   |
