@@ -70,7 +70,7 @@ Requirements: ffmpeg, a migrated database, and `DATABASE_URL` in `.env.local`.
 
 ## Run it locally
 
-Requirements: Node 24, pnpm 12.9.1, Docker.
+Requirements: Node 24 or newer, pnpm 12.9.1, Docker. CI pins Node 24.
 
 ```bash
 pnpm install
@@ -105,22 +105,44 @@ Generate a secret with `openssl rand -base64 32`.
 
 ## Scripts
 
-| Command                 | What it does                                     |
-| ----------------------- | ------------------------------------------------ |
-| `pnpm dev`              | Dev server                                       |
-| `pnpm build`            | Production build                                 |
-| `pnpm capture`          | Drive the app and regenerate README media        |
-| `pnpm capture:fresh`    | Build, then drive the app and regenerate media   |
-| `pnpm verify`           | Format check, lint, typecheck, unit tests, build |
-| `pnpm verify:full`      | Above plus DB integration tests                  |
-| `pnpm test`             | Unit tests                                       |
-| `pnpm test:integration` | Postgres integration tests                       |
-| `pnpm db:migrate`       | Apply migrations                                 |
-| `pnpm db:seed`          | Upsert categories and seed companions            |
-| `pnpm db:generate`      | Generate a migration from `src/db/schema.ts`     |
+Development.
 
-CI runs migrations, seeds the catalogue, then runs `pnpm verify` and `pnpm test:integration`
-against a pgvector service container. See `.github/workflows/ci.yml`.
+| Command       | What it does               |
+| ------------- | -------------------------- |
+| `pnpm dev`    | Dev server on port 3000    |
+| `pnpm build`  | Production build           |
+| `pnpm start`  | Serve the production build |
+| `pnpm lint`   | ESLint across the repo     |
+| `pnpm format` | Prettier across the repo   |
+
+Verification.
+
+| Command                 | What it does                                                                       |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `pnpm verify`           | Format check, lint, typecheck, unit tests, production build                        |
+| `pnpm verify:full`      | Above plus Postgres integration tests                                              |
+| `pnpm test`             | Unit tests                                                                         |
+| `pnpm test:watch`       | Unit tests in watch mode                                                           |
+| `pnpm test:integration` | Postgres integration tests                                                         |
+| `pnpm arch`             | Layer boundary check. Pages, components and `src/domain` may not import `src/db`   |
+| `pnpm prove`            | Writes violating files and asserts every guardrail catches them                    |
+| `pnpm harness`          | Scores ten harness criteria and exits non-zero when one fails                      |
+| `pnpm smoke`            | Builds, serves the production app in mock mode on port 3210 and checks five routes |
+
+Database and media.
+
+| Command              | What it does                                   |
+| -------------------- | ---------------------------------------------- |
+| `pnpm db:migrate`    | Apply migrations                               |
+| `pnpm db:generate`   | Generate a migration from `src/db/schema.ts`   |
+| `pnpm db:push`       | Push the schema to the database                |
+| `pnpm db:seed`       | Upsert categories and seed companions          |
+| `pnpm db:studio`     | Open Drizzle Studio                            |
+| `pnpm capture`       | Drive the app and regenerate README media      |
+| `pnpm capture:fresh` | Build, then drive the app and regenerate media |
+
+CI applies migrations, seeds the catalogue, runs `pnpm verify:full`, then runs `pnpm smoke` against
+a pgvector service container. See `.github/workflows/ci.yml`.
 
 ## How it works
 
@@ -140,27 +162,52 @@ similarity, importance, and recency. The top entries go into the system prompt.
 `AI_MODE=mock` short-circuits extraction and retrieval. Chat and history still work. Memory retrieval
 requires a live embedding provider.
 
+## Agent harness
+
+`AGENTS.md` is the operating contract for coding agents, and `CLAUDE.md` points at it. Four checks
+keep its rules true.
+
+- `pnpm arch` bans `@/db` imports from pages, components and `src/domain`, so those layers read
+  through `src/app/actions`.
+- `pnpm prove` writes a file that breaks each guardrail and asserts the owning checker fails. A rule
+  without a proof case is a rule nobody has tested.
+- `pnpm harness` scores ten criteria against the tree, each with a real check, and exits non-zero
+  when one fails.
+- `pnpm smoke` builds the app, serves it with `AI_MODE=mock`, and checks five routes for the
+  expected text.
+
+A mistake becomes a permanent check through [`docs/ratchet.md`](docs/ratchet.md). Fix at the
+strongest layer, add a proof case, then add a row to [`docs/mistake-log.md`](docs/mistake-log.md).
+Lefthook runs the branch guard, the Next.js agent block check, format, lint and typecheck on every
+commit, and `pnpm install` installs the hook. `scripts/guard-branch.sh` refuses a commit on `main`
+or `master`.
+
 ## Architecture decisions
 
 The decisions that are expensive to reverse live in [`docs/adr`](docs/adr/README.md). The index
-covers the full-stack framework, Postgres with pgvector, the auth boundary, mock AI mode, the point
-where streamed replies are persisted, and the integration test strategy.
+covers the full-stack framework, Postgres with pgvector and Drizzle, Better Auth, the
+OpenAI-compatible provider, mock AI mode, authorization next to the data, stream then persist,
+embedding memory, server actions for the studio, and integration tests against real Postgres.
 
 ## Layout
 
 ```
+.github          CI workflow
 src/app          routes, server actions, chat API
 src/components   UI, including chat and studio
-src/db           schema, migrations-facing queries, seed
-src/domain       pure validation, prompt, memory, and search logic
+src/db           schema, actor-scoped queries, seed
+src/domain       pure validation, prompt, memory and search logic
 src/lib          auth, AI provider, env, session
+src/test         test setup and the AGENTS.md check
 docs/adr         architecture decisions and their trade-offs
-scripts          demo capture and local tooling
+docs             ratchet procedure and mistake log
 drizzle          generated SQL migrations
+eslint-rules     local lint rules
+scripts          demo capture, smoke test, harness and guardrail checks
 ```
 
-`src/domain` has no database imports. Each module has a unit test beside it. The database query
-modules are covered by the integration test in `src/db`.
+`src/domain` has no database imports, and every logic module there has a unit test beside it. The
+database query modules are covered by the integration tests in `src/db`.
 
 ## Notes
 
