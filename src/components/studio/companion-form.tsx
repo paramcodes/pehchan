@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button, Description, FieldError, Input, Label, TextArea, TextField } from "@heroui/react";
 import type { CompanionActionState } from "@/app/actions/studio-state";
-import type { Category } from "@/db/companions";
-import type { CompanionExample } from "@/db/schema";
+import type { Category } from "@/domain/catalogue";
+import type { CompanionExample } from "@/domain/companion";
 import { serializeExamples } from "@/domain/companion";
 
 const PRESETS = [

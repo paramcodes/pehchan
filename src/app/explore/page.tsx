@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { getExplorePageData } from "@/app/actions/catalogue";
 import { CompanionCard } from "@/components/companion-card";
-import { listCategories, listCompanions } from "@/db/companions";
 import { normalizeSearchQuery } from "@/domain/search";
 
 export const metadata = { title: "Explore" };
@@ -14,10 +14,7 @@ export default async function ExplorePage({
   const query = normalizeSearchQuery(params.q);
   const category = params.category;
 
-  const [categories, companions] = await Promise.all([
-    listCategories(),
-    listCompanions({ query, categorySlug: category }),
-  ]);
+  const { categories, companions } = await getExplorePageData(query, category);
 
   const activeCategory = categories.find((item) => item.slug === category);
 

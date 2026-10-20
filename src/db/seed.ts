@@ -1,5 +1,6 @@
 import { db, pool } from "@/db";
-import { categories, companions, type CompanionExample } from "@/db/schema";
+import { categories, companions } from "@/db/schema";
+import type { CompanionExample } from "@/domain/companion";
 
 const categorySeed = [
   {
@@ -301,7 +302,9 @@ async function main() {
       });
   }
 
-  console.log(`Seeded ${categorySeed.length} categories and ${companionSeed.length} companions.`);
+  process.stdout.write(
+    `Seeded ${categorySeed.length} categories and ${companionSeed.length} companions.\n`,
+  );
 }
 
 main()

@@ -1,16 +1,12 @@
 import Link from "next/link";
+import { getHomePageData } from "@/app/actions/catalogue";
 import { LandingHero } from "@/components/landing-hero";
 import { CompanionCard } from "@/components/companion-card";
-import { countCatalogue, listCategories, listFeaturedCompanions } from "@/db/companions";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [categories, featured, counts] = await Promise.all([
-    listCategories(),
-    listFeaturedCompanions(4),
-    countCatalogue(),
-  ]);
+  const { categories, featured, counts } = await getHomePageData();
 
   return (
     <div>

@@ -4,35 +4,8 @@ import { db } from "@/db";
 import { categories, companions, conversations, memories } from "@/db/schema";
 import type { CompanionFormInput } from "@/domain/companion";
 import { slugify } from "@/domain/companion";
+import type { Category, CompanionDetail, CompanionListItem } from "@/domain/catalogue";
 import { toTsQuery } from "@/domain/search";
-
-export type Category = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-};
-
-export type CompanionListItem = {
-  id: string;
-  name: string;
-  slug: string;
-  tagline: string;
-  imageUrl: string;
-  visibility: "public" | "private";
-  categoryId: string;
-  categoryName: string;
-  categorySlug: string;
-};
-
-export type CompanionDetail = CompanionListItem & {
-  ownerId: string | null;
-  description: string;
-  greeting: string;
-  instructions: string;
-  examples: { user: string; assistant: string }[];
-  createdAt: Date;
-};
 
 const listColumns = {
   id: companions.id,

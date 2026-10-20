@@ -1,5 +1,9 @@
 import { z } from "zod";
-import type { CompanionExample } from "@/db/schema";
+
+export type CompanionExample = {
+  user: string;
+  assistant: string;
+};
 
 export const COMPANION_LIMITS = {
   name: { min: 2, max: 60 },

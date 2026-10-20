@@ -1,23 +1,22 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { updateCompanionAction } from "@/app/actions/studio";
+import { notFound, redirect } from "next/navigation";
+import { getEditStudioData, updateCompanionAction } from "@/app/actions/studio";
 import { initialCompanionState } from "@/app/actions/studio-state";
 import { CompanionForm } from "@/components/studio/companion-form";
-import { getOwnedCompanion, listCategories } from "@/db/companions";
-import { requireUser } from "@/lib/session";
+import { getSession } from "@/lib/session";
 
 export const metadata = { title: "Edit companion" };
 
 export default async function EditCompanionPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await requireUser();
+  const session = await getSession();
+  if (!session) redirect("/sign-in");
+
   const { id } = await params;
 
-  const [companion, categories] = await Promise.all([
-    getOwnedCompanion(id, session.user.id),
-    listCategories(),
-  ]);
+  const data = await getEditStudioData(id);
+  if (!data) notFound();
 
-  if (!companion) notFound();
+  const { companion, categories } = data;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-12 sm:py-16">

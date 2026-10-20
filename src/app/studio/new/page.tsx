@@ -1,15 +1,16 @@
 import Link from "next/link";
-import { createCompanionAction } from "@/app/actions/studio";
+import { redirect } from "next/navigation";
+import { createCompanionAction, getNewStudioData } from "@/app/actions/studio";
 import { initialCompanionState } from "@/app/actions/studio-state";
 import { CompanionForm } from "@/components/studio/companion-form";
-import { listCategories } from "@/db/companions";
-import { requireUser } from "@/lib/session";
 
 export const metadata = { title: "New companion" };
 
 export default async function NewCompanionPage() {
-  await requireUser();
-  const categories = await listCategories();
+  const data = await getNewStudioData();
+  if (!data) redirect("/sign-in");
+
+  const { categories } = data;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-12 sm:py-16">

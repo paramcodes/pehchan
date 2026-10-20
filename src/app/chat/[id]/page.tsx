@@ -1,31 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { UIMessage } from "ai";
+import { getChatPageData } from "@/app/actions/chat";
 import { ChatPanel } from "@/components/chat/chat-panel";
-import {
-  countMemoriesForCompanion,
-  getConversationForUser,
-  listMessages,
-  listRecentConversations,
-} from "@/db/chat";
 import { isMockAi } from "@/lib/env";
-import { requireUser } from "@/lib/session";
+import { getSession } from "@/lib/session";
 
 export const metadata = { title: "Chat" };
 
 export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const session = await requireUser();
-  const conversation = await getConversationForUser(id, session.user.id);
+  const session = await getSession();
+  if (!session) redirect("/sign-in");
 
-  if (!conversation) notFound();
+  const data = await getChatPageData(id);
+  if (!data) notFound();
 
-  const [messages, recent, memoryCount] = await Promise.all([
-    listMessages(conversation.id),
-    listRecentConversations(session.user.id, 10),
-    countMemoriesForCompanion(session.user.id, conversation.companionId),
-  ]);
+  const { conversation, messages, recent, memoryCount } = data;
 
   const initialMessages: UIMessage[] = messages.map((message) => ({
     id: message.id,

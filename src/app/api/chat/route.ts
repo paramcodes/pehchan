@@ -71,11 +71,12 @@ async function persistAssistant(input: {
 
   await appendMessage({
     conversationId: input.conversationId,
+    userId: input.userId,
     role: "assistant",
     content: input.text,
   });
 
-  const recent = await listMessages(input.conversationId, 16);
+  const recent = await listMessages(input.conversationId, input.userId, 16);
   const userTurns = recent.filter((message) => message.role === "user").length;
 
   if (userTurns === 1) {
@@ -83,7 +84,7 @@ async function persistAssistant(input: {
       companionName: input.companionName,
       firstMessage: recent.find((message) => message.role === "user")?.content ?? input.text,
     });
-    await updateConversationTitle(input.conversationId, title);
+    await updateConversationTitle(input.conversationId, input.userId, title);
   }
 
   if (userTurns % 2 !== 1) return;
@@ -138,8 +139,13 @@ export async function POST(request: Request) {
     return Response.json({ error: "Companion not found." }, { status: 404 });
   }
 
-  const history = await listMessages(conversation.id, 20);
-  await appendMessage({ conversationId: conversation.id, role: "user", content: userText });
+  const history = await listMessages(conversation.id, session.user.id, 20);
+  await appendMessage({
+    conversationId: conversation.id,
+    userId: session.user.id,
+    role: "user",
+    content: userText,
+  });
 
   const memories = await retrieveMemories({
     userId: session.user.id,

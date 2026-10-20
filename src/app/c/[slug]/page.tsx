@@ -1,25 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getCompanionMetadata, getCompanionPageData } from "@/app/actions/catalogue";
 import { startChatAction } from "@/app/actions/chat";
-import { getCompanionBySlug } from "@/db/companions";
-import { getSession } from "@/lib/session";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const companion = await getCompanionBySlug(slug);
-  if (!companion) return { title: "Companion" };
-  return { title: companion.name, description: companion.tagline };
+  const metadata = await getCompanionMetadata(slug);
+  if (!metadata) return { title: "Companion" };
+  return metadata;
 }
 
 export default async function CompanionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const session = await getSession();
-  const companion = await getCompanionBySlug(slug, session?.user.id);
+  const data = await getCompanionPageData(slug);
 
-  if (!companion) notFound();
+  if (!data) notFound();
 
-  const isOwner = session?.user.id === companion.ownerId;
+  const { companion, isOwner, isSignedIn } = data;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10 sm:py-14">
@@ -86,7 +84,7 @@ export default async function CompanionPage({ params }: { params: Promise<{ slug
           </div>
 
           <p className="mt-4 text-xs text-muted">
-            {session
+            {isSignedIn
               ? "History and memories are saved to your account."
               : "You will need an account to talk."}
           </p>

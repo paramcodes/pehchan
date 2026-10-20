@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
-import type { CompanionListItem } from "@/db/companions";
+import type { CompanionListItem } from "@/domain/catalogue";
 
 export function LandingHero({
   companions,

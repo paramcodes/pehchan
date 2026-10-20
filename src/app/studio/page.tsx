@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getStudioPageData } from "@/app/actions/studio";
 import { DeleteCompanionButton } from "@/components/studio/delete-companion-button";
-import { countConversations, countMemories, listOwnedCompanions } from "@/db/companions";
-import { requireUser } from "@/lib/session";
 
 export const metadata = { title: "Studio" };
 
@@ -17,14 +17,12 @@ export default async function StudioPage({
 }: {
   searchParams: Promise<{ created?: string; updated?: string; deleted?: string }>;
 }) {
-  const session = await requireUser();
   const params = await searchParams;
 
-  const [companions, conversationCount, memoryCount] = await Promise.all([
-    listOwnedCompanions(session.user.id),
-    countConversations(session.user.id),
-    countMemories(session.user.id),
-  ]);
+  const data = await getStudioPageData();
+  if (!data) redirect("/sign-in");
+
+  const { companions, conversationCount, memoryCount } = data;
 
   const notice = params.created
     ? notices.created

@@ -13,13 +13,9 @@ import {
   uuid,
   vector,
 } from "drizzle-orm/pg-core";
+import type { CompanionExample } from "@/domain/companion";
 
 export const EMBEDDING_DIMENSIONS = 1536;
-
-export type CompanionExample = {
-  user: string;
-  assistant: string;
-};
 
 export const companionVisibility = pgEnum("companion_visibility", ["public", "private"]);
 export const messageRole = pgEnum("message_role", ["user", "assistant", "system"]);

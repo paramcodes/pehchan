@@ -1,4 +1,4 @@
-import type { CompanionExample } from "@/db/schema";
+import type { CompanionExample } from "@/domain/companion";
 
 export type CompanionPromptSource = {
   name: string;

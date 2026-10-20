@@ -5,8 +5,17 @@ import { redirect } from "next/navigation";
 import { collectFieldErrors, companionFormSchema, parseExamples } from "@/domain/companion";
 import type { CompanionActionState } from "@/app/actions/studio-state";
 import { initialCompanionState } from "@/app/actions/studio-state";
-import { createCompanion, deleteCompanion, listCategories, updateCompanion } from "@/db/companions";
-import { requireUserForAction } from "@/lib/session";
+import {
+  countConversations,
+  countMemories,
+  createCompanion,
+  deleteCompanion,
+  getOwnedCompanion,
+  listCategories,
+  listOwnedCompanions,
+  updateCompanion,
+} from "@/db/companions";
+import { getSession, requireUserForAction } from "@/lib/session";
 
 function readForm(formData: FormData) {
   return {
@@ -91,4 +100,38 @@ export async function deleteCompanionAction(formData: FormData) {
   revalidatePath("/studio");
   revalidatePath("/explore");
   redirect("/studio?deleted=1");
+}
+
+export async function getStudioPageData() {
+  const session = await getSession();
+  if (!session) return null;
+
+  const [companions, conversationCount, memoryCount] = await Promise.all([
+    listOwnedCompanions(session.user.id),
+    countConversations(session.user.id),
+    countMemories(session.user.id),
+  ]);
+
+  return { companions, conversationCount, memoryCount };
+}
+
+export async function getNewStudioData() {
+  const session = await getSession();
+  if (!session) return null;
+
+  const categories = await listCategories();
+  return { categories };
+}
+
+export async function getEditStudioData(id: string) {
+  const session = await getSession();
+  if (!session) return null;
+
+  const [companion, categories] = await Promise.all([
+    getOwnedCompanion(id, session.user.id),
+    listCategories(),
+  ]);
+
+  if (!companion) return null;
+  return { companion, categories };
 }

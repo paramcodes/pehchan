@@ -126,7 +126,11 @@ export async function getOrCreateConversation(input: {
   return getConversationForUser(created.id, input.userId);
 }
 
-export async function listMessages(conversationId: string, limit = 80): Promise<ChatMessage[]> {
+export async function listMessages(
+  conversationId: string,
+  userId: string,
+  limit = 80,
+): Promise<ChatMessage[]> {
   const rows = await db
     .select({
       id: messages.id,
@@ -135,7 +139,8 @@ export async function listMessages(conversationId: string, limit = 80): Promise<
       createdAt: messages.createdAt,
     })
     .from(messages)
-    .where(eq(messages.conversationId, conversationId))
+    .innerJoin(conversations, eq(messages.conversationId, conversations.id))
+    .where(and(eq(messages.conversationId, conversationId), eq(conversations.userId, userId)))
     .orderBy(desc(messages.createdAt))
     .limit(limit);
 
@@ -144,10 +149,21 @@ export async function listMessages(conversationId: string, limit = 80): Promise<
 
 export async function appendMessage(input: {
   conversationId: string;
+  userId: string;
   role: "user" | "assistant" | "system";
   content: string;
 }): Promise<ChatMessage | null> {
   const [row] = await db.transaction(async (tx) => {
+    const [owned] = await tx
+      .select({ id: conversations.id })
+      .from(conversations)
+      .where(
+        and(eq(conversations.id, input.conversationId), eq(conversations.userId, input.userId)),
+      )
+      .limit(1);
+
+    if (!owned) return [];
+
     const inserted = await tx
       .insert(messages)
       .values({
@@ -165,7 +181,9 @@ export async function appendMessage(input: {
     await tx
       .update(conversations)
       .set({ updatedAt: new Date(), lastMessageAt: new Date() })
-      .where(eq(conversations.id, input.conversationId));
+      .where(
+        and(eq(conversations.id, input.conversationId), eq(conversations.userId, input.userId)),
+      );
 
     return inserted;
   });
@@ -175,12 +193,13 @@ export async function appendMessage(input: {
 
 export async function updateConversationTitle(
   conversationId: string,
+  userId: string,
   title: string,
 ): Promise<void> {
   await db
     .update(conversations)
     .set({ title: title.slice(0, 80), updatedAt: new Date() })
-    .where(eq(conversations.id, conversationId));
+    .where(and(eq(conversations.id, conversationId), eq(conversations.userId, userId)));
 }
 
 export type RetrievedMemory = {

@@ -1,13 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { listRecentConversations } from "@/db/chat";
-import { requireUser } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { getChatsPageData } from "@/app/actions/chat";
 
 export const metadata = { title: "Chats" };
 
 export default async function ChatsPage() {
-  const session = await requireUser();
-  const conversations = await listRecentConversations(session.user.id, 50);
+  const data = await getChatsPageData();
+  if (!data) redirect("/sign-in");
+
+  const { conversations } = data;
 
   return (
     <div className="mx-auto w-full max-w-4xl px-5 py-12 sm:py-16">

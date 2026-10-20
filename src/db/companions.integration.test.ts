@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { db, pool } from "@/db";
+import { db } from "@/db";
 import {
   appendMessage,
   getConversationForUser,
@@ -20,6 +20,7 @@ import {
 } from "@/db/companions";
 import { categories, user } from "@/db/schema";
 import type { CompanionFormInput } from "@/domain/companion";
+import { closeDatabase } from "@/test/integration-db";
 
 const suffix = randomUUID().slice(0, 8);
 const ownerId = `test-owner-${suffix}`;
@@ -69,7 +70,7 @@ afterAll(async () => {
   await db.delete(user).where(eq(user.id, ownerId));
   await db.delete(user).where(eq(user.id, strangerId));
   await db.delete(categories).where(eq(categories.id, categoryId));
-  await pool.end();
+  await closeDatabase();
 });
 
 describe("companion catalogue", () => {
@@ -164,16 +165,18 @@ describe("conversation history", () => {
 
     await appendMessage({
       conversationId: conversation.id,
+      userId: ownerId,
       role: "user",
       content: "Is this stored?",
     });
     await appendMessage({
       conversationId: conversation.id,
+      userId: ownerId,
       role: "assistant",
       content: "Every message is.",
     });
 
-    const history = await listMessages(conversation.id);
+    const history = await listMessages(conversation.id, ownerId);
     expect(history.map((message) => message.content)).toEqual([
       "Is this stored?",
       "Every message is.",

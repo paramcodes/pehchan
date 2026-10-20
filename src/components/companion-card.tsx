@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { CompanionListItem } from "@/db/companions";
+import type { CompanionListItem } from "@/domain/catalogue";
 
 export function CompanionCard({
   companion,
