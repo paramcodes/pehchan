@@ -21,6 +21,9 @@ Run these from the repository root. pnpm is the only package manager. The lockfi
 | Command                 | What it does                                                      |
 | ----------------------- | ----------------------------------------------------------------- |
 | `pnpm dev`              | Next.js dev server on port 3000                                   |
+| `pnpm build`            | Production build                                                  |
+| `pnpm capture`          | Drive the app and regenerate README media                         |
+| `pnpm capture:fresh`    | Build, then drive the app and regenerate media                    |
 | `pnpm verify`           | `format:check`, `lint`, `typecheck`, unit tests, production build |
 | `pnpm verify:full`      | `verify` plus integration tests. Needs Postgres                   |
 | `pnpm test`             | Unit tests in `src/**/*.test.ts`                                  |
@@ -76,6 +79,9 @@ Better Auth with email and password. AI SDK 7 against any OpenAI-compatible endp
 A change is done when `pnpm verify` passes. A schema or query change also needs
 `pnpm test:integration` against a migrated database. Do not weaken lint rules or TypeScript
 settings to make a change pass. Do not add a second lockfile or a second package manager.
+
+README media comes from `pnpm capture:fresh`. Review the generated images before committing them.
+The capture script creates and deletes its own account and never reuses user data.
 
 Prettier ignores generated output, the lockfile, and Drizzle metadata. `todo.md` is a local agent
 checklist and stays gitignored.

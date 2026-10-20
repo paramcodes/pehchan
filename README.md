@@ -32,6 +32,31 @@ creation. It runs on the production build with `AI_MODE=mock`.
 | ------------------------------------------------- | -------------------------------------------- |
 | ![Companion studio](docs/screenshots/studio.webp) | ![Chat history](docs/screenshots/chats.webp) |
 
+## Regenerate the demo media
+
+The screenshots and recordings are generated, not hand-edited. `scripts/capture-demo.mjs` drives the
+production build in Chromium, writes each still, then runs ffmpeg to produce WebP, GIF, and MP4.
+
+Install the browser once.
+
+```bash
+pnpm exec playwright install chromium
+```
+
+Then run:
+
+```bash
+pnpm capture:fresh
+```
+
+The script starts `next start` when nothing is listening, creates a disposable account, records the
+flow, deletes the account, and removes its work directory. Set `CAPTURE_BASE_URL` to target another
+server. The cleanup uses `DATABASE_URL`, so point it at the database that server uses, and make sure
+the server's auth URL matches the capture origin. Pass `--keep-user` to keep the account or
+`--keep-work` to keep the raw PNG and WebM files.
+
+Requirements: ffmpeg, a migrated database, and `DATABASE_URL` in `.env.local`.
+
 ## Stack
 
 | Layer     | Choice                                                   |
@@ -84,6 +109,8 @@ Generate a secret with `openssl rand -base64 32`.
 | ----------------------- | ------------------------------------------------ |
 | `pnpm dev`              | Dev server                                       |
 | `pnpm build`            | Production build                                 |
+| `pnpm capture`          | Drive the app and regenerate README media        |
+| `pnpm capture:fresh`    | Build, then drive the app and regenerate media   |
 | `pnpm verify`           | Format check, lint, typecheck, unit tests, build |
 | `pnpm verify:full`      | Above plus DB integration tests                  |
 | `pnpm test`             | Unit tests                                       |
@@ -128,6 +155,7 @@ src/db           schema, migrations-facing queries, seed
 src/domain       pure validation, prompt, memory, and search logic
 src/lib          auth, AI provider, env, session
 docs/adr         architecture decisions and their trade-offs
+scripts          demo capture and local tooling
 drizzle          generated SQL migrations
 ```
 

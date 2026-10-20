@@ -1,6 +1,7 @@
 allowBuilds:
   esbuild: true
   sharp: true
+  playwright: false
   unrs-resolver: false
 minimumReleaseAgeExclude:
   - '@ai-sdk/gateway@4.0.119'

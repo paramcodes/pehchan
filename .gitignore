@@ -37,6 +37,9 @@ yarn-error.log*
 # local agent todo
 todo.md
 
+# capture work files
+/.capture/
+
 # vercel
 .vercel
 
