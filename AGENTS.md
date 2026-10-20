@@ -48,6 +48,8 @@ Better Auth with email and password. AI SDK 7 against any OpenAI-compatible endp
 - `src/domain` is pure logic. Companion validation, slugging, prompt construction, memory scoring,
   and search normalization live here and are unit tested.
 - `src/lib` holds the AI provider, auth setup, env reads, and session helpers.
+- `docs/adr` records why the stack, visibility rule, streaming boundary, and memory design are what
+  they are. Read the relevant record before changing one of those decisions.
 
 ## Rules that keep this codebase coherent
 

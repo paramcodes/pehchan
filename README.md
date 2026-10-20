@@ -113,6 +113,12 @@ similarity, importance, and recency. The top entries go into the system prompt.
 `AI_MODE=mock` short-circuits extraction and retrieval. Chat and history still work. Memory retrieval
 requires a live embedding provider.
 
+## Architecture decisions
+
+The decisions that are expensive to reverse live in [`docs/adr`](docs/adr/README.md). The index
+covers the full-stack framework, Postgres with pgvector, the auth boundary, mock AI mode, the point
+where streamed replies are persisted, and the integration test strategy.
+
 ## Layout
 
 ```
@@ -121,6 +127,7 @@ src/components   UI, including chat and studio
 src/db           schema, migrations-facing queries, seed
 src/domain       pure validation, prompt, memory, and search logic
 src/lib          auth, AI provider, env, session
+docs/adr         architecture decisions and their trade-offs
 drizzle          generated SQL migrations
 ```
 
