@@ -371,10 +371,10 @@ criterion_8() {
     return
   fi
 
-  local passed
-  passed="$(printf '%s' "$LAST_OUTPUT" | grep -c '^PASS /')"
-  if [ "$passed" -lt 5 ]; then
-    report 8 FAIL "$reason" "only $passed routes passed, five are required"
+  local routes_passed
+  routes_passed="$(printf '%s' "$LAST_OUTPUT" | grep -c '^PASS /')"
+  if [ "$routes_passed" -lt 5 ]; then
+    report 8 FAIL "$reason" "only $routes_passed routes passed, five are required"
     return
   fi
 
@@ -462,6 +462,11 @@ criterion_9
 criterion_10
 
 printf '\nharness: %d passed, %d failed\n' "$passed" "$failed"
+
+if [ "$passed" -ne 10 ]; then
+  printf 'harness: the score did not cover all ten criteria\n'
+  exit 1
+fi
 
 if [ "$failed" -ne 0 ]; then
   exit 1
