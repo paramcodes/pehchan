@@ -72,7 +72,7 @@ they are.
   turns a wrong assumption into a cheap correction. Enforced by: docs/ratchet.md
 - One branch or worktree per task, and never two agents on the same package. Parallel writers on
   one tree lose each other's changes. Enforced by: docs/ratchet.md
-- Never commit to or force-push `main`. The default branch is what every other agent builds on.
+- Never commit to or force-push `main` or `master`. The default branch is what every other agent builds on.
   Enforced by: lefthook.yml
 - Done means `pnpm verify:full` and `pnpm smoke` pass and a manual check is recorded in the pull
   request. A green gate is evidence, a recorded human check is proof. Enforced by: scripts/harness-score.sh
